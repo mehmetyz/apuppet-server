@@ -1,90 +1,116 @@
-.debug-border {
-	border: 1px solid #dee2e6 !important;
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap");
+
+.app-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 200px);
 }
 
-input.form-control::placeholder{
-	color: #aaa;
+.main-color {
+  background-color: #12232e;
+  color: #eefbfb;
+  font-family: Raleway;
+}
+.joystick {
+  display: initial;
+  opacity: 0.4;
+}
+
+.social-icon {
+  margin-left: 10px;
+  color: #4da8da;
+}
+
+.app-button-color {
+  background-color: #203647;
+  border-color: #4da8da;
+}
+.debug-border {
+  border: 1px solid #dee2e6 !important;
+}
+
+input.form-control::placeholder {
+  color: #aaa;
 }
 
 .rounded {
-	border-radius: 5px;
+  border-radius: 5px;
 }
 
 .centered {
-	display: block;
-	margin: auto;
+  display: block;
+  margin: auto;
 }
 
 .relative {
-	position: relative;
+  position: relative;
 }
 
 .title-start {
-	margin-top: 50px;
-	margin-bottom: 50px;
+  margin-top: 50px;
+  margin-bottom: 50px;
 }
 
 .btn-start {
-	font-size: 30px;
-	margin-top: 25px;
-	width: 200px;
-	padding-bottom: 12px;
+  font-size: 30px;
+  margin-top: 25px;
+  width: 200px;
+  padding-bottom: 12px;
 }
 
 .input-start {
-	font-size: 24px;
+  font-size: 24px;
 }
 
 .fa-2 {
-	font-size: 2em !important;
+  font-size: 2em !important;
 }
 .fa-3 {
-	font-size: 4em !important;
+  font-size: 4em !important;
 }
 .fa-4 {
-	font-size: 7em !important;
+  font-size: 7em !important;
 }
 .fa-5 {
-	font-size: 12em !important;
+  font-size: 12em !important;
 }
 .fa-6 {
-	font-size: 20em !important;
+  font-size: 20em !important;
 }
 
-
 span.link {
-	cursor: pointer;
-	color: blue;
-	text-decoration: underline;
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
 }
 
 span.link:hover {
-	text-decoration: none;
+  text-decoration: none;
 }
 
-.active-icon:hover{
-	cursor: pointer;
+.active-icon:hover {
+  cursor: pointer;
 }
 
 .active-icon:active {
-	transform: scale(0.95);
+  transform: scale(0.95);
 }
 
 #deviceGestures {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 0);
-	z-index: 100500;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 100500;
 }
 
 #textareaClipboard {
-	width: 0px;
-	height: 0px;
-	opacity: 0;
+  width: 0px;
+  height: 0px;
+  opacity: 0;
 }
-

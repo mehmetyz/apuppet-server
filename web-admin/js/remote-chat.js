@@ -17,23 +17,20 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
 
     var obj = this;  // for event handlers
 
-    this.setCommandsProcessor = function(commands){
+    this.setCommandsProcessor = function (commands) {
         this.commandsProcessor = commands;
     }
 
     /* Transactions */
     this.startTransaction = function (data, callback, errorCallback) {
         var transactionId = Janus.randomString(12);
-        console.debug('chat: transaction start', transactionId, data, callback, errorCallback);
 
         data.transaction = transactionId;
         this.transactions[transactionId] = callback;
-        console.debug('now we have', Object.keys(this.transactions).length, 'active transactions');
 
         this.textroom.data({
             text: JSON.stringify(data),
             error: function (reason) {
-                console.error('chat: transaction send data error', reason);
                 bootbox.alert(reason);
                 if (errorCallback) {
                     errorCallback(reason);
@@ -46,10 +43,8 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
 
     this.processTransactionAnswer = function (transactionId, data) {
         if (this.transactions[transactionId]) {
-            console.debug('chat: transaction answered', transactionId, data)
             var ret = this.transactions[transactionId](data);
             delete this.transactions[transactionId];
-            console.debug('chat: now we have', Object.keys(this.transactions).length, 'active transactions');
             return [undefined, null].indexOf(ret) < 0 ? ret : true;
         }
         return false;
@@ -82,12 +77,11 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
 
 
     /* TextRoom functions */
-    this.setUp = function(textroom){
+    this.setUp = function (textroom) {
         this.textroom = textroom;
-        console.info('chat: set up ..');
 
-        var body = {"request": "setup"};
-        this.textroom.send({"message": body});
+        var body = { "request": "setup" };
+        this.textroom.send({ "message": body });
     };
 
     this.startRoom = function (sessionId, pin) {
@@ -100,14 +94,13 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
         this.registerUserAndJoinRoom();
     };
 
-    this.leaveRoom = function(){
+    this.leaveRoom = function () {
         this.disableAllChatControls();
         var leaveData = {
             textroom: "leave",
             room: this.sessionId,
         }
-        console.debug('chat: leaving room', leaveData);
-        this.startTransaction(leaveData, function(response){
+        this.startTransaction(leaveData, function (response) {
             obj.textroom.hangup();
         });
     }
@@ -121,7 +114,6 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
             username: this.userId,
             display: this.userName,
         };
-        console.debug('chat: join room & register user', registerData);
 
         this.startTransaction(registerData, function (response) {
             if (response.textroom === "error") {
@@ -134,10 +126,9 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
                 }
                 return;
             }
-            console.debug('chat: we are in the room!');
 
             var device = null;
-            if(response.participants && response.participants.length > 0) {
+            if (response.participants && response.participants.length > 0) {
                 for (var i in response.participants) {
                     var p = response.participants[i];
                     var pId = p.username;
@@ -147,24 +138,21 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
                         obj.appendMessageToChat(`<i>${pName} already in room</i>`);
                     }
 
-                    if (pId.substring(0, 7).toLowerCase() === 'device:'){
-                        if(!device) {
+                    if (pId.substring(0, 7).toLowerCase() === 'device:') {
+                        if (!device) {
                             device = [pId, pName];
                         } else {
                             console.warn('chat: it seems the room has more than one device!');
                         }
                     }
                 }
-                console.debug('chat: room has participants', Array.from(obj.participants.entries()));
             }
             // если явно не найден девайс при обработке присутствующих, при этом имеем единственного - делаем девайсом его
-            if(!device && obj.participants.size === 1){
+            if (!device && obj.participants.size === 1) {
                 device = obj.participants.entries().next().value;
             }
-            if(device){
+            if (device) {
                 ui.setDevice(device[0], device[1]);
-            } else {
-                console.error('chat: can not determine device from participants');
             }
 
             obj.enableAllChatControls();
@@ -174,7 +162,6 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
         }, function (reason) {
             ui.connAbort();
             obj.disableAllChatControls();
-            console.error('chat: joining room error', reason);
             ui.showError(reason, 'join_error');
         });
     };
@@ -189,7 +176,6 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
             room: this.sessionId,
             text: data,
         };
-        console.debug('textroom: sending chat message', messageData);
 
         this.disableAllChatControls();
         this.startTransaction(messageData, function (response) {
@@ -202,16 +188,15 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
     };
 
     this.cleanup = function () {
-        console.debug('chat: cleanup');
         this.disableAllChatControls();
         ui.emit('RemoteChat.onManagementStop');
     };
 
 
     /* Messages Processing */
-    this.processIncomingMessage = function (message, from, date, isWhisper){
+    this.processIncomingMessage = function (message, from, date, isWhisper) {
         console.debug('chat: incoming message', message, from, date, isWhisper);
-        if (this.commandsProcessor !== null){
+        if (this.commandsProcessor !== null) {
             this.commandsProcessor.process(message);
         }
         message = this._formatMessageForHTML(message);
@@ -226,15 +211,13 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
 
     };
 
-    this.processAnnouncement = function (message, date){
-        console.debug('chat: announcement', message, date);
+    this.processAnnouncement = function (message, date) {
         message = this._formatMessageForHTML(message);
         var dateString = getDateString(date);
         this.appendMessageToChat(`<i>${message}</i>`, 'purple', dateString);
     };
 
-    this.processJoin = function (userId, userName){
-        console.debug('chat: user joined', userId, userName);
+    this.processJoin = function (userId, userName) {
         this.participants.set(userId, userName ? userName : userId);
 
         if (userId !== this.userId) {
@@ -243,18 +226,16 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
         this.appendMessageToChat(`<i>${this.participants.get(userId)} joined</i>`, 'green');
     };
 
-    this.processLeave = function (userId){
-        console.debug('chat: user leaved', userId);
+    this.processLeave = function (userId) {
         this.appendMessageToChat(`<i>${this.participants.get(userId)} leaved</i>`, 'green');
         this.participants.delete(userId);
 
-        if(userId === ui.deviceId){
+        if (userId === ui.deviceId) {
             ui.sessionClosedRemotely('Device left the session');
         }
     };
 
-    this.processKick = function (userId){
-        console.debug('chat: user kicked', userId);
+    this.processKick = function (userId) {
         this.appendMessageToChat(`<i>${this.participants.get(userId)} kicked</i>`, 'red');
         this.participants.delete(userId);
 
@@ -263,23 +244,22 @@ function RemoteChat(chatElem, chatForm, messageInput, sendButton) {
         }
     };
 
-    this.processRoomDestroy = function (roomId){
+    this.processRoomDestroy = function (roomId) {
         if (roomId !== this.sessionId) {
             return;
         }
-        console.debug('chat: current room has been destroyed', roomId);
         this.appendMessageToChat(`<b>Session ${this.sessionId} has been closed</b>`);
 
         ui.sessionClosedRemotely('Session has been closed');
     }
 
-    this.appendMessageToChat = function (message, color, dateString){
+    this.appendMessageToChat = function (message, color, dateString) {
         dateString = dateString ? dateString : getDateString();
         this.chatElem.append(`<p style="color: ${color};">[${dateString}] ${message}</p>`);
         this.chatScrollDown();
     }
 
-    this._formatMessageForHTML = function (message){
+    this._formatMessageForHTML = function (message) {
         message = message.replace(new RegExp('<', 'g'), '&lt');
         message = message.replace(new RegExp('>', 'g'), '&gt');
         return message;

@@ -1,11 +1,14 @@
 $(document).ready(function () {
     var ui = new UI();
+
     window['ui'] = ui;
+
+    var isJoystickOn = false;
 
     // Make sure the browser supports WebRTC
     if (!Janus.isWebrtcSupported()) {
-        ui.showErrorModal('There is no WebRTC support in this browser. Please, try the newest version of Google Chrome or Mozilla Firefox', 'no_webrtc_support', function(){window.location.reload();});
-        console.error('No WebRTC support - no cartoons');
+        ui.showErrorModal('There is no WebRTC support in this browser. Please, try the newest version of Google Chrome or Mozilla Firefox', 'no_webrtc_support', function () { window.location.reload(); });
+
         return;
     }
 
@@ -33,24 +36,21 @@ $(document).ready(function () {
     var commands = new Commands(remoteChat, remoteVideo);
     remoteChat.setCommandsProcessor(commands);
 
-    var gestureBuilder = new GestureBuilder($('#deviceGestures'), remoteChat);
+    const gesture = $('#deviceGestures');
+    var gestureBuilder = new GestureBuilder(gesture, remoteChat);
 
-    // Session monitoring
     var sessionMonitoring = new SessionMonitoring(remoteChat);
 
     // Cheat codes on page :)
     window.cheatCodes = new CheatCodes();
 
-    var remoteKeyboard = new RemoteKeyboard(remoteChat);
+    var remoteKeyboard = new RemoteKeyboard(remoteChat, gestureBuilder, gesture);
 
     var remoteClipboard = new RemoteClipboard(remoteChat);
 
-    // Debug stuff
-    console.debug('actual Janus servers:', janusServers);
-    console.debug('janus debug level:', janusDebugLevel);
     window['debugUtils'] = new DebugUtils(remoteChat);
 
-    ui.on('CheatCodes.onCheatEntered', function(cheat){
+    ui.on('CheatCodes.onCheatEntered', function (cheat) {
         if (cheat === 'needtodebug') {
             window.debugUtils.enable();
         }
@@ -76,14 +76,12 @@ $(document).ready(function () {
                         opaqueId: textroomOpaqueId,
                         success: function (pluginHandle) {
                             textroom = pluginHandle;
-                            console.info("textroom: plugin attached! (" + textroom.getPlugin() + ", id=" + textroom.getId() + ")");
 
                             remoteChat.setUp(textroom);
                             ui.initTextroomReady();
                         },
 
                         error: function (error) {
-                            console.error("textroom: error attaching plugin: ", error);
                             bootbox.alert("Ошибка подключения к сессии: " + error);
                         },
 
@@ -94,27 +92,24 @@ $(document).ready(function () {
                             console.debug("textroom: WebRTC PeerConnection is " + (on ? "UP" : "DOWN") + " now")
                         },
 
-                        slowLink: function(uplink, lost){
+                        slowLink: function (uplink, lost) {
                             ui.showWarning(`Network problems`, 'Device management', null, null, 2000);
                         },
 
                         onmessage: function (msg, jsep) {
-                            console.debug("textroom: got a message ", msg);
 
                             if (msg.error) {
-                                console.error('textroom: onmessage got error', msg)
                                 bootbox.alert(msg.error);
                             }
                             if (jsep) {
-                                console.debug("textroom: answering for SDP", jsep);
                                 // Answer
                                 textroom.createAnswer({
                                     jsep: jsep,
-                                    media: {audio: false, video: false, data: true},
+                                    media: { audio: false, video: false, data: true },
                                     success: function (jsep) {
                                         console.debug("textroom: success answering with SDP", jsep);
-                                        var body = {"request": "ack"};
-                                        textroom.send({"message": body, "jsep": jsep});
+                                        var body = { "request": "ack" };
+                                        textroom.send({ "message": body, "jsep": jsep });
                                     },
                                     error: function (error) {
                                         console.error("textroom: WebRTC error", error);
@@ -129,7 +124,6 @@ $(document).ready(function () {
                         },
 
                         ondata: function (rawData) {
-                            console.debug("textroom: got data from DataChannel", rawData);
 
                             var data = JSON.parse(rawData);
 
@@ -137,7 +131,6 @@ $(document).ready(function () {
                             var transactionId = data.transaction;
                             var transactionResult = remoteChat.processTransactionAnswer(transactionId, data);
                             if (transactionResult) {
-                                console.debug('textroom: done transaction with id', transactionId, 'and result', transactionResult);
                                 return;
                             }
 
@@ -163,7 +156,6 @@ $(document).ready(function () {
                         },
 
                         oncleanup: function () {
-                            console.info("textroom: got cleanup");
                             remoteChat.cleanup();
                         }
                     });
@@ -174,14 +166,12 @@ $(document).ready(function () {
                         opaqueId: streamingOpaqueId,
                         success: function (pluginHandle) {
                             streaming = pluginHandle;
-                            console.info("streaming: plugin attached! (" + streaming.getPlugin() + ", id=" + streaming.getId() + ")");
                             remoteVideo.setStreamingPluginHandle(streaming);
                             videoStats.setStreamingPluginHandle(streaming);
                             ui.initStreamingReady();
                         },
 
                         error: function (error) {
-                            console.error("streaming: error attaching plugin", error);
                             ui.showError(`'Streaming error: ${error}`, 'streaming_error');
                         },
 
@@ -192,12 +182,11 @@ $(document).ready(function () {
                             console.debug("streaming: WebRTC PeerConnection is " + (on ? "UP" : "DOWN") + " now")
                         },
 
-                        slowLink: function(uplink, lost){
+                        slowLink: function (uplink, lost) {
                             ui.showWarning(`Network problems`, 'Screen sharing', null, null, 2000);
                         },
 
                         onmessage: function (msg, jsep) {
-                            console.debug("streaming: got a message", msg, jsep);
                             var result = msg.result;
                             // check result
                             if (result) {
@@ -216,10 +205,9 @@ $(document).ready(function () {
                             }
                             // check error
                             else if (msg.error) {
-                                console.error('streaming: onmessage error', msg.error);
                                 ui.connAbort();
 
-                                if (msg.error_code === 455){
+                                if (msg.error_code === 455) {
                                     ui.showError(`Session ${remoteVideo.mountpointId} does not exist`, 'no_session');
                                 } else {
                                     ui.showError(msg["error"], 'streaming_message_error');
@@ -230,28 +218,24 @@ $(document).ready(function () {
 
                             // handle JSEP
                             if (jsep) {
-                                console.debug("streaming: handling remote SDP", jsep);
                                 var stereo = (jsep.sdp.indexOf("stereo=1") !== -1);
                                 // got offer from the plugin, let's answer
                                 streaming.createAnswer({
                                     jsep: jsep,
                                     // We want recvonly audio/video and, if negotiated, datachannels
-                                    media: {audioSend: false, videoSend: false, data: true},
+                                    media: { audioSend: false, videoSend: false, data: true },
 
                                     // our offer should contains stereo if remote SDP has it
                                     customizeSdp: function (jsep) {
                                         if (stereo && jsep.sdp.indexOf("stereo=1") === -1) {
                                             jsep.sdp = jsep.sdp.replace("useinbandfec=1", "useinbandfec=1;stereo=1");
-                                            console.debug("streaming: SDP customized", jsep);
                                         }
                                     },
                                     success: function (jsep) {
-                                        console.debug("streaming: success answering with SDP", jsep);
-                                        var body = {"request": "start"};
-                                        streaming.send({"message": body, "jsep": jsep});
+                                        var body = { "request": "start" };
+                                        streaming.send({ "message": body, "jsep": jsep });
                                     },
                                     error: function (error) {
-                                        console.error("streaming: WebRTC error", error);
                                         ui.showError(`'WebRTC error: ${JSON.stringify(error)}`, 'webrtc_error');
                                     }
                                 });
@@ -259,17 +243,15 @@ $(document).ready(function () {
                         },
 
                         onremotestream: function (stream) {
-                            console.info("streaming: got remote stream", stream);
                             remoteVideo.setStream(stream);
                         },
                         oncleanup: function () {
-                            console.info("streaming: got cleanup");
                             remoteVideo.cleanup();
                         },
                     });
                 },
                 error: function (error) {
-                    ui.showErrorModal(`Session error: ${error}`, 'janus_session_error', function(){window.location.reload();}, 5);
+                    ui.showErrorModal(`Session error: ${error}`, 'janus_session_error', function () { window.location.reload(); }, 5);
                 },
                 destroyed: function () {
                     ui.sessionClosedRemotely('Session has been destroyed');
@@ -277,7 +259,6 @@ $(document).ready(function () {
             });
         }
     });
-
     // Session login
     $('#login-form').on('submit', function (e) {
         var sessionId = $('#input-session-id').val();
@@ -285,43 +266,45 @@ $(document).ready(function () {
         ui.connStart();
         remoteVideo.startStreamMountpoint(sessionId, pin);
         remoteChat.startRoom(sessionId, pin);
+
+        Janus.log = function (strix) { };
         e.preventDefault();
     });
 
     // Back button
-    $('#btnBack').on('click', function(e){
-        if(remoteChat){
+    $('#btnBack').on('click', function (e) {
+        if (remoteChat) {
             remoteChat.sendData('back');
         }
     });
 
     // Home button
-    $('#btnHome').on('click', function(e){
-        if(remoteChat){
+    $('#btnHome').on('click', function (e) {
+        if (remoteChat) {
             remoteChat.sendData('home');
         }
     });
 
     // Recents button
-    $('#btnRecents').on('click', function(e){
-        if(remoteChat){
+    $('#btnRecents').on('click', function (e) {
+        if (remoteChat) {
             remoteChat.sendData('recents');
         }
     });
 
     // Notification button
-    $('#btnNotifications').on('click', function(e){
-        if(remoteChat){
+    $('#btnNotifications').on('click', function (e) {
+        if (remoteChat) {
             remoteChat.sendData('notifications');
         }
     });
 
     // Disconnect button
-    $('#btnDisconnect').on('click', function(e){
+    $('#btnDisconnect').on('click', function (e) {
         ui.emit('Session.Disconnect');
     });
 
-    ui.on('Session.Disconnect', function(){
+    ui.on('Session.Disconnect', function () {
         remoteVideo.stopStreaming();
         remoteChat.leaveRoom();
         ui.disconnect();
@@ -329,7 +312,10 @@ $(document).ready(function () {
 
 
     // Close debug stuff
-    $('#debugClose').on('click', function(e){
+    $('#debugClose').on('click', function (e) {
         window.debugUtils.disable();
     });
+
+
 });
+

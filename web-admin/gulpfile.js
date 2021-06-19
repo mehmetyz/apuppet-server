@@ -5,17 +5,18 @@ const
     clean = require('gulp-clean'),
     cleanCSS = require('gulp-clean-css'),
     terser = require('gulp-terser')
-;
+    ;
 
-gulp.task('clean', function(){
-    return gulp.src('dist/', {read: false})
+gulp.task('clean', function () {
+    return gulp.src('dist/', { read: true })
         .pipe(clean())
 });
 
-gulp.task('styles', function(){
+gulp.task('styles', function () {
     return gulp.src([
         'css/main.css',
         'css/loader.css',
+        'css/login.css',
     ])
         .pipe(concat('app.min.css'))
         .pipe(cleanCSS({
@@ -27,10 +28,9 @@ gulp.task('styles', function(){
         .pipe(gulp.dest('dist/css'));
 });
 
-gulp.task('deps-styles', function(){
+gulp.task('deps-styles', function () {
     return gulp.src([
         'css/lib/bootstrap-4.3.1.min.css',
-        'css/lib/font-awesome-4.6.2.min.css',
         'css/lib/toastr.min.css'
     ])
         .pipe(concat('deps.min.css'))
@@ -43,7 +43,7 @@ gulp.task('deps-styles', function(){
         .pipe(gulp.dest('dist/css'));
 });
 
-gulp.task('scripts', function(){
+gulp.task('scripts', function () {
     return gulp.src([
         'js/janus.js',
         'js/utils.js',
@@ -67,8 +67,7 @@ gulp.task('scripts', function(){
         }))
         .pipe(gulp.dest('dist/js'));
 });
-
-gulp.task('deps-scripts', function() {
+gulp.task('deps-scripts', function () {
     return gulp.src([
         'js/lib/jquery-3.3.1.min.js',
         'js/lib/bootstrap-4.3.1.min.js',

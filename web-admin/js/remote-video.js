@@ -11,7 +11,7 @@ function RemoteVideo(remoteVideoElem, videoLoader, videoStats) {
 
     var obj = this;  // for event handlers
 
-    this.getStreamVideotracks = function(){
+    this.getStreamVideotracks = function () {
         return this.stream ? this.stream.getVideoTracks() : [];
     }
 
@@ -19,19 +19,17 @@ function RemoteVideo(remoteVideoElem, videoLoader, videoStats) {
         if (!this.isVideoAlreadyPlayed || window.debugUtils.isDebugEnabled()) {
             this.videoLoader.show();
         }
-        console.debug('video: no remote');
     }
 
     this.hasRemoteVideo = function () {
         this.videoLoader.hide();
-        console.debug('video: has remote');
     }
 
-    this.setStreamingPluginHandle = function(streaming){
+    this.setStreamingPluginHandle = function (streaming) {
         this.streaming = streaming;
     }
 
-    this.setResolution = function(w, h){
+    this.setResolution = function (w, h) {
         this.videoResolution = [w, h];
         this.remoteVideoElem.attr('width', w).attr('height', h);
     }
@@ -59,15 +57,13 @@ function RemoteVideo(remoteVideoElem, videoLoader, videoStats) {
 
     this.startStreamMountpoint = function (mountpointId, pin) {
         this.mountpointId = mountpointId;
-        console.info("streaming: starting mountpoint id " + mountpointId + ' with pin ' + pin);
 
-        var body = {"request": "watch", "id": mountpointId, "pin": pin};
-        this.streaming.send({"message": body});
+        var body = { "request": "watch", "id": mountpointId, "pin": pin };
+        this.streaming.send({ "message": body });
         this.noRemoteVideo();
     }
 
     this.remoteVideoElem.on("playing", function (e) {
-        console.debug('video: playing event', e);
 
         if (obj.getStreamVideotracks().length > 0) {
             obj.videoStats.start();
@@ -80,14 +76,12 @@ function RemoteVideo(remoteVideoElem, videoLoader, videoStats) {
     });
 
     this.stopStreaming = function () {
-        console.info('video: stopping streaming');
-        this.streaming.send({"message": {"request": "stop"}});
+        this.streaming.send({ "message": { "request": "stop" } });
         this.streaming.hangup();
         this.cleanup();
     }
 
     this.cleanup = function () {
-        console.info('video: cleanup ..');
         this.videoStats.stop();
     }
 }

@@ -5,7 +5,7 @@ function VideoStats(bitrateElem, resolutionElem, remoteVideoElem) {
     this.remoteVideoElem = remoteVideoElem;
     this.interval = null;
 
-    this.setStreamingPluginHandle = function(streaming){
+    this.setStreamingPluginHandle = function (streaming) {
         this.streaming = streaming;
     }
 
@@ -13,12 +13,12 @@ function VideoStats(bitrateElem, resolutionElem, remoteVideoElem) {
         return this.interval;
     }
 
-    this.hideElems = function(){
+    this.hideElems = function () {
         this.bitrateElem.addClass('d-none');
         this.resolutionElem.addClass('d-none');
     }
 
-    this.showElems = function(){
+    this.showElems = function () {
         this.bitrateElem.removeClass('d-none');
         this.resolutionElem.removeClass('d-none');
     }
@@ -28,7 +28,6 @@ function VideoStats(bitrateElem, resolutionElem, remoteVideoElem) {
             clearInterval(this.interval);
 
             this.hideElems();
-            console.debug('VideoStats: stopped');
         }
     }
 
@@ -64,6 +63,5 @@ function VideoStats(bitrateElem, resolutionElem, remoteVideoElem) {
             }, 500);
         })(this);
 
-        console.debug('VideoStats: started');
     }
 }

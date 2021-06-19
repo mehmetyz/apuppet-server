@@ -1,92 +1,123 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-    <title>aPuppet Web Administrator</title>
+    <title>Android Remote Controller</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="Open source web application to access Android devices remotely (remote support program)" />
+    <meta name="description" content="Remote Control Application" />
 
     <link rel="shortcut icon" href="static/images/favicon.ico" type="image/x-icon">
 
-    <link rel="stylesheet" href="dist/css/deps.min.css" type="text/css"/>
-    <link rel="stylesheet" href="dist/css/app.min.css" type="text/css"/>
+    <link rel="stylesheet" href="dist/css/deps.min.css" type="text/css" />
+    <link rel="stylesheet" href="dist/css/app.min.css" type="text/css" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" />
+
 </head>
-<body class="d-flex flex-column min-vh-100">
+
+<body class="d-flex flex-column min-vh-100 main-color">
+
+    <header>
+        <nav class="navbar navbar-dark navbar-fixed main-color" style="border-bottom: 2px solid #203647" >
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/" style="color:#4da8da; font-weight:bold"> 
+                    Android Remote Control
+                </a>
+                <div class="d-flex">
+                    <div class="md-auto">
+                        <a href="https://www.linkedin.com/in/mehmetyz" class="fa fa-linkedin social-icon fa-lg "> </a>
+                        <a href="https://github.com/mehmetyz" class="fa fa-github social-icon fa-lg"> </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
     <div id="pageLoader" class="loader loader-default is-active" data-text="Loading .."></div>
-
-    <!-- Login form -->
-    <form id="login-form">
-
-        <div class="container" id="login-form-container">
-            <div class="row justify-content-center">
-                <div class="col-md-6 text-center">
-                    <h1 class="title-start">aPuppet - Ready to Control!</h1>
-                </div>
+    <div class="container login-container" id="login-form-container" >
+    <div class="row justify-content-center">
+    <div class="col-md-6 login-form-2 d-flex align-items-center">
+        <h3>Remote Control</h3>
+        <form id="login-form" autocomplete="off">
+            <div class="form-group">
+                <label for="input-session-id">Device ID</label>
+                <input type="text" id="input-session-id" class="form-control login-input" placeholder="Enter device ID" maxlength="8" />
             </div>
-            <div class="row justify-content-center">
-                <div class="col-md-6 text-center">
-                    <p>Enter the credentials provided by the mobile device user</p>
-                </div>
+            <div class="form-group">
+                <label for="input-pin">Device Pin</label>
+                <input type="text" class="form-control login-input" id="input-pin" placeholder="Enter device Pin" value="" maxlength="4"/>
             </div>
-            <div class="row justify-content-center">
-                <div class="col-md-6">
+            <div class="form-group">
+                <input type="submit" class="btnSubmit" value="Connect" />
+            </div>
+    </div> 
+    </div>
+    </div>
+    <div class="d-none" id="main-window" style="margin:4%">
 
-                        <div class="form-group">
-                            <label for="input-session-id">Session ID</label>
-                            <input type="text" class="form-control input-start" id="input-session-id" maxlength="8"
-                                   placeholder="e.g., 12345678">
+        <div class="row flex-row">
+            <div class="col-8">
+                <div class="row justify-content-center">
+                    <div class="col-md-auto justify-content-center text-center p-0" id="windowStream">
+                        <div id="videoLoader" class="loader loader-bouncing"></div>
+                        <div id="deviceGestures">
+                            <div id="joystick" class="d-none joystick">
+                                <img src="static/images/icon-joystick.png" alt="" width="48" height="48"/>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="input-pin">Password</label>
-                            <input type="text" class="form-control input-start" id="input-pin" maxlength="4"
-                                   placeholder="e.g., 0000">
-                        </div>
-
+                        <video class="rounded centered border" id="streamingRemoteVideo" autoplay playsinline width="540"
+                            height="1064"></video>
+                    </div>
+                </div>
+                <div class="row row-flex justify-content-center" >
+                    <div class="col-md-6 justify-content-center" style=" display: flex;align-items:center; margin-top: 30px;">
+                        <button class="btn btn-primary app-button-color" 
+                        id="btnBack" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Back">
+                            <img src="static/images/icon-back.png" alt="" width="32" height="32" />
+                        </button>
+                        &nbsp;
+                        <button class="btn btn-primary app-button-color" 
+                        id="btnHome" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home">
+                            <img src="static/images/icon-home.png" alt="" width="32" height="32" />
+                        </button>
+                        &nbsp;
+                        <button class="btn btn-primary app-button-color" 
+                        id="btnRecents" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" title="Recents">
+                            <img src="static/images/icon-recents.png" alt="" width="32" height="32" />
+                        </button>
+                        &nbsp; &nbsp;&nbsp; &nbsp;
+                        <button class="btn btn-primary app-button-color" 
+                        id="btnNotifications" >
+                            <img src="static/images/icon-notify.png"
+                            alt="" width="32" height="32" />
+                        </button>
+                        
+                    </div>
                 </div>
             </div>
-            <div class="row justify-content-center">
-                <div class="col-md-6 text-center">
-                    <button type="submit" class="btn btn-primary btn-start">Start</button>
+            <div class="col-4">
+                <div class="row flex">
+                    <div class="card col-12 p-4 " style="background-color: #203647">
+                        
+                        <div class="d-flex justify-content-center">
+                            <div class="btn btn-danger" style="cursor: pointer" id="btnDisconnect">Disconnect</div>
+                         </div>
+                        &nbsp;
+                        <div>Device Name: <b id="textDeviceName"></b></div>
+                        &nbsp;
+                        <div>Status: <b id="streamingStatus"></b></div>
+                        <div>Resolution: <b id="streamingCurrentResolution"> </b></div>
+                        <div>Bitrate: <b id="streamingCurrentBitrate"> </b></div>
+
+                    </div>
+            
                 </div>
             </div>
-        </div>
-    </form>
-
-
-    <!-- Main area with video and device controls -->
-    <div class="container d-none" id="main-window">
-        <div class="row justify-content-center">
-            <div class="col-md-4 text-center">
-                <h2 id="textDeviceName">...</h2>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-4 text-center">
-                <span class="link" id="btnNotifications">Expand Status Bar</span>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-auto justify-content-center text-center p-0" id="windowStream">
-                <div id="videoLoader" class="loader loader-bouncing"></div>
-                <div id="deviceGestures"></div>
-                <video class="rounded centered border" id="streamingRemoteVideo" autoplay playsinline
-                    width="540" height="1064"></video>
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-auto justify-content-center text-center">
-                <img src="static/images/icon-back.png" class="m-3 active-icon" style="width: 30px;" alt="Back" id="btnBack" />
-                <img src="static/images/icon-home.png" class="m-3 active-icon" style="width: 30px;" alt="Home" id="btnHome" />
-                <img src="static/images/icon-recents.png" class="m-3 active-icon" style="width: 30px;" alt="Recents" id="btnRecents" />
-            </div>
-        </div>
-        <div class="row justify-content-center">
-            <span class="link" id="btnDisconnect">Disconnect</span>
         </div>
     </div>
-
     <textarea id="textareaClipboard"></textarea>
 
     <!-- Debug stuff, invisible by default (text chat, stream metrics, etc.) -->
@@ -99,9 +130,6 @@
                         <span class="card-title">
                             <button id="debugClose" class="btn btn-info">X</button>
                             Debug utils
-                            <span class="badge badge-info" id="streamingStatus">Status</span>
-                            <span class="badge badge-primary" id="streamingCurrentResolution">Resolution</span>
-                            <span class="badge badge-info" id="streamingCurrentBitrate">Bitrate</span>
                         </span>
                     </div>
 
@@ -111,11 +139,9 @@
                     <div class="card-footer">
                         <form id="chat-form">
                             <div class="input-group margin-bottom-sm">
-                                <input class="form-control" type="text"
-                                       placeholder="Message" autocomplete="off"
-                                       id="textroomMessageInput" disabled/>
-                                <button type="submit" class="btn btn-primary ml-1"
-                                        id="textroomSendButton" disabled>Send
+                                <input class="form-control" type="text" placeholder="Message" autocomplete="off"
+                                    id="textroomMessageInput" disabled />
+                                <button type="submit" class="btn btn-primary ml-1" id="textroomSendButton" disabled>Send
                                 </button>
                             </div>
                         </form>
@@ -126,10 +152,14 @@
         </div>
     </div>
 
-    <footer class="mt-auto">
+    <footer class="mt-auto main-color" style="width:100%; border-top: 2px solid #203647">
         <div class="container">
             <div class="row justify-content-center p-1">
-                <a href="https://apuppet.org">aPuppet</a>&nbsp;- Open Source Remote Control for Android&nbsp;&copy;&nbsp;<script type="text/javascript">document.write(new Date().getFullYear().toString())</script>&nbsp;<a href="https://h-mdm.com">Headwind MDM</a>
+                <a href="https://apuppet.org/" style="font-weight: bold; color:white">Apuppet</a>&nbsp;- Android Remote Control
+                Application&nbsp;&copy;&nbsp;
+                <script type="text/javascript">document.write(new Date().getFullYear().toString())</script>
+                &nbsp;
+                / &nbsp; Contributing by &nbsp; <a href="https://github.com/mehmetyz" style="font-weight: bold; color:white">Mehmet Yıldız</a>
             </div>
         </div>
     </footer>
@@ -138,4 +168,5 @@
     <script type="text/javascript" src="dist/js/app.min.js"></script>
     <script type="text/javascript" src="dist/js/settings.js"></script>
 </body>
+
 </html>
